@@ -37,6 +37,10 @@ func CreateComment(c *gin.Context, db *gorm.DB) {
 		c.JSON(400, gin.H{"error": "Invalid data"})
 		return
 	}
+	if newComment.Content == "" {
+		c.JSON(400, gin.H{"error": "Content is required"})
+		return
+	}
 	newComment.ID = uuid.New()
 	db.Create(&newComment)
 	c.JSON(201, newComment)
@@ -60,6 +64,11 @@ func UpdateComment(c *gin.Context, db *gorm.DB) {
 	// Parse the incoming JSON data to update the comment fields
 	if err := c.ShouldBindJSON(&comment); err != nil {
 		c.JSON(400, gin.H{"error": "Invalid data"})
+		return
+	}
+
+	if comment.Content == "" {
+		c.JSON(400, gin.H{"error": "Content is required"})
 		return
 	}
 

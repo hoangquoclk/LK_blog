@@ -9,7 +9,7 @@ import (
 type Comment struct {
 	gorm.Model
 	ID        uuid.UUID `gorm:"type:varchar(36);primary_key"`
-	Content   string
+	Content   string    `gorm:"not null"`
 	UserId    uuid.UUID `gorm:"type:varchar(36)"`
 	PostId    uuid.UUID `gorm:"type:varchar(36)"`
 	CreatedAt time.Time
