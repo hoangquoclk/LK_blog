@@ -13,6 +13,10 @@ func DatabaseConnection() (*gorm.DB, error) {
 	}
 
 	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Category{})
+	db.AutoMigrate(&model.Post{})
+	db.AutoMigrate(&model.Comment{})
+	db.AutoMigrate(&model.Like{})
 
 	return db, nil
 }

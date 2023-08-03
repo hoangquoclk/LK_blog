@@ -9,11 +9,11 @@ import (
 type Post struct {
 	gorm.Model
 	ID         uuid.UUID `gorm:"type:varchar(36);primary_key"`
-	Title      string
-	Content    string
-	CategoryId string `gorm:"type:varchar(36)"`
-	UserId     string `gorm:"type:varchar(36)"`
-	Author     string
+	Title      string    `gorm:"not null"`
+	Content    string    `gorm:"not null"`
+	CategoryId uuid.UUID `gorm:"type:varchar(36);not null"`
+	UserId     uuid.UUID `gorm:"type:varchar(36);not null"`
+	Author     string    `gorm:"not null"`
 	Like       uint
 	Image      string
 	CreatedAt  time.Time
