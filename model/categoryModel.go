@@ -9,7 +9,7 @@ import (
 type Category struct {
 	gorm.Model
 	ID        uuid.UUID `gorm:"type:varchar(36);primary_key"`
-	Name      string
+	Name      string    `gorm:"not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
