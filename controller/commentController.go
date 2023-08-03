@@ -17,7 +17,7 @@ func GetCommentById(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
@@ -46,7 +46,7 @@ func UpdateComment(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
@@ -77,7 +77,7 @@ func DeleteComment(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 

@@ -8,9 +8,8 @@ import (
 
 type Like struct {
 	gorm.Model
-	ID        uuid.UUID `gorm:"type:varchar(36);primary_key"`
-	PostId    string    `gorm:"type:varchar(36)"`
-	UserId    string    `gorm:"type:varchar(36)"`
+	PostId    uuid.UUID `gorm:"type:varchar(36);primaryKey"`
+	UserId    uuid.UUID `gorm:"type:varchar(36);primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
