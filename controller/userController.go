@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"LK_blog/config/service"
 	"LK_blog/model"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -9,8 +10,8 @@ import (
 )
 
 func GetAllUsers(c *gin.Context, db *gorm.DB) {
-	var users []model.User
-	db.Find(&users)
+	var users []model.APIUser
+	db.Model(&model.User{}).Find(&users)
 	c.JSON(200, users)
 }
 
@@ -18,12 +19,12 @@ func GetUserById(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
-	user := model.User{ID: id}
-	result := db.First(&user)
+	user := model.APIUser{ID: id}
+	result := db.Model(&model.User{}).First(&user)
 	if result.Error != nil {
 		c.JSON(404, gin.H{"error": "User not found"})
 		return
@@ -38,7 +39,13 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 		c.JSON(400, gin.H{"error": "Invalid data"})
 		return
 	}
-	hashPassword, errHash := HashPassword(newUser.Password)
+
+	if newUser.Birthday.IsZero() {
+		c.JSON(400, gin.H{"error": "Birthday is required"})
+		return
+	}
+
+	hashPassword, errHash := service.HashPassword(newUser.Password)
 	if errHash != nil {
 		c.JSON(400, gin.H{"error": "Hash password fail"})
 	}
@@ -53,7 +60,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
@@ -72,7 +79,7 @@ func UpdateUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	if updateUser.Password != "" {
-		hashPassword, errHash := HashPassword(user.Password)
+		hashPassword, errHash := service.HashPassword(user.Password)
 		if errHash != nil {
 			c.JSON(400, gin.H{"error": "Hash password fail"})
 		}
@@ -93,7 +100,7 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 

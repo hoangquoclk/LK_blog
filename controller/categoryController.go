@@ -17,7 +17,7 @@ func GetCategoryById(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
@@ -46,7 +46,7 @@ func UpdateCategory(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
@@ -77,7 +77,7 @@ func DeleteCategory(c *gin.Context, db *gorm.DB) {
 	uuidStr := c.Param("id")
 	id, err := uuid.Parse(uuidStr)
 	if err != nil {
-		c.JSON(400, gin.H{"error": "Invalid UUID"})
+		c.JSON(422, gin.H{"error": "Invalid UUID"})
 		return
 	}
 
