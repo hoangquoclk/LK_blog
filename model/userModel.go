@@ -8,7 +8,7 @@ import (
 
 type User struct {
 	gorm.Model
-	ID        uuid.UUID `gorm:"type:varchar(36);primary_key"`
+	ID        uuid.UUID `gorm:"type:varchar(45);primary_key"`
 	Username  string    `gorm:"not null"`
 	Password  string    `gorm:"not null"`
 	FirstName string    `gorm:"not null"`
@@ -24,7 +24,7 @@ type User struct {
 
 type APIUser struct {
 	gorm.Model
-	ID        uuid.UUID `gorm:"type:varchar(36);primary_key"`
+	ID        uuid.UUID `gorm:"type:varchar(45);primary_key"`
 	Username  string    `gorm:"not null"`
 	FirstName string    `gorm:"not null"`
 	LastName  string    `gorm:"not null"`
