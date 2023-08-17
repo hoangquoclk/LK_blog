@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"regexp"
 	"time"
 )
 
@@ -33,6 +34,12 @@ func GetUserById(c *gin.Context, db *gorm.DB) {
 	c.JSON(200, user)
 }
 
+func isValidEmail(email string) bool {
+	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	regex := regexp.MustCompile(pattern)
+	return regex.MatchString(email)
+}
+
 func CreateUser(c *gin.Context, db *gorm.DB) {
 	var newUser model.User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
@@ -42,6 +49,19 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 
 	if newUser.Birthday.IsZero() {
 		c.JSON(400, gin.H{"error": "Birthday is required"})
+		return
+	}
+
+	if newUser.Email == "" {
+		c.JSON(400, gin.H{"error": "Email is required"})
+		return
+	}
+
+	var validMail = isValidEmail(newUser.Email)
+	if validMail {
+		service.SendMail(service.MailInfo{LastName: newUser.LastName, FirstName: newUser.FirstName})
+	} else {
+		c.JSON(400, gin.H{"error": "Invalid email format, please correct your email!"})
 		return
 	}
 
@@ -111,7 +131,6 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// Delete the user from the database
 	result = db.Delete(&user)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "Failed to delete user"})
