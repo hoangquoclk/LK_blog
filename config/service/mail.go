@@ -1,6 +1,7 @@
 package service
 
 import (
+	"LK_blog/model"
 	"bytes"
 	"gopkg.in/gomail.v2"
 	"html/template"
@@ -12,7 +13,7 @@ type MailInfo struct {
 	LastName  string
 }
 
-func SendMail(i MailInfo) {
+func SendMail(i model.User) {
 	t := template.New("template.html")
 
 	var err error
@@ -22,7 +23,10 @@ func SendMail(i MailInfo) {
 	}
 
 	var tpl bytes.Buffer
-	if err := t.Execute(&tpl, i); err != nil {
+
+	mailInfo := MailInfo{FirstName: i.FirstName, LastName: i.LastName}
+
+	if err := t.Execute(&tpl, mailInfo); err != nil {
 		log.Println(err)
 	}
 

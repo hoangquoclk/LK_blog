@@ -59,7 +59,7 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 
 	var validMail = isValidEmail(newUser.Email)
 	if validMail {
-		service.SendMail(service.MailInfo{LastName: newUser.LastName, FirstName: newUser.FirstName})
+		service.SendMail(newUser)
 	} else {
 		c.JSON(400, gin.H{"error": "Invalid email format, please correct your email!"})
 		return
