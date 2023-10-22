@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"regexp"
 	"time"
 )
 
@@ -33,6 +34,12 @@ func GetUserById(c *gin.Context, db *gorm.DB) {
 	c.JSON(200, user)
 }
 
+func isValidEmail(email string) bool {
+	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	regex := regexp.MustCompile(pattern)
+	return regex.MatchString(email)
+}
+
 func CreateUser(c *gin.Context, db *gorm.DB) {
 	var newUser model.User
 	if err := c.ShouldBindJSON(&newUser); err != nil {
@@ -42,6 +49,19 @@ func CreateUser(c *gin.Context, db *gorm.DB) {
 
 	if newUser.Birthday.IsZero() {
 		c.JSON(400, gin.H{"error": "Birthday is required"})
+		return
+	}
+
+	if newUser.Email == "" {
+		c.JSON(400, gin.H{"error": "Email is required"})
+		return
+	}
+
+	var validMail = isValidEmail(newUser.Email)
+	if validMail {
+		service.SendMail(newUser)
+	} else {
+		c.JSON(400, gin.H{"error": "Invalid email format, please correct your email!"})
 		return
 	}
 
@@ -111,7 +131,6 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// Delete the user from the database
 	result = db.Delete(&user)
 	if result.Error != nil {
 		c.JSON(500, gin.H{"error": "Failed to delete user"})
@@ -119,4 +138,36 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 	}
 
 	c.JSON(200, gin.H{"message": "User deleted successfully"})
+}
+
+func Login(c *gin.Context, db *gorm.DB) {
+	var user model.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+
+	var existingUser model.User
+
+	db.Model(&model.User{Email: user.Email}).First(&existingUser)
+
+	if existingUser.ID == uuid.Nil {
+		c.JSON(400, gin.H{"error": "user does not exist"})
+		return
+	}
+
+	errHash := service.CheckPasswordHash(user.Password, existingUser.Password)
+
+	if !errHash {
+		c.JSON(400, gin.H{"error": "invalid password"})
+		return
+	}
+
+	tokenString, err, expirationTime := service.GenerateToken(existingUser.Role, existingUser.Email)
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to generate token"})
+		return
+	}
+	c.JSON(200, gin.H{"token": tokenString, "expiresAt": expirationTime.Unix()})
 }
