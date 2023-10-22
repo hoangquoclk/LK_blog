@@ -139,3 +139,35 @@ func DeleteUser(c *gin.Context, db *gorm.DB) {
 
 	c.JSON(200, gin.H{"message": "User deleted successfully"})
 }
+
+func Login(c *gin.Context, db *gorm.DB) {
+	var user model.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+	}
+
+	var existingUser model.User
+
+	db.Model(&model.User{Email: user.Email}).First(&existingUser)
+
+	if existingUser.ID == uuid.Nil {
+		c.JSON(400, gin.H{"error": "user does not exist"})
+		return
+	}
+
+	errHash := service.CheckPasswordHash(user.Password, existingUser.Password)
+
+	if !errHash {
+		c.JSON(400, gin.H{"error": "invalid password"})
+		return
+	}
+
+	tokenString, err, expirationTime := service.GenerateToken(existingUser.Role, existingUser.Email)
+
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to generate token"})
+		return
+	}
+	c.JSON(200, gin.H{"token": tokenString, "expiresAt": expirationTime.Unix()})
+}
